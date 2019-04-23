@@ -3,15 +3,26 @@ filetype off                  " required
 
 set encoding=utf-8
 set nu " Line numbering
-set backspace=indent,eol,start  " backspace
+set backspace=indent,eol,start  " backspace will actually work
 
-:set scrolloff=15  " Stay pretty centered in screen
+set scrolloff=25  " Stay pretty centered in screen
 set splitbelow " Always split under
 set splitright " Always split to the right
+
+" Status line
+set statusline=%02n:%f\ Line\ %l\ Column\ %c\ %m
+set laststatus=2
+
+" Guide line
+set colorcolumn=120
+highlight ColorColumn ctermbg=8
 
 " Enable folding
 set foldmethod=indent
 set foldlevel=99
+
+" Save all .swp files in ~/.vim/tmp/
+set directory^=$HOME/.vim/tmp//
 
 " Set leader key
 let mapleader = ","
@@ -26,6 +37,9 @@ au BufNewFile,BufRead *.py
     \ set fileformat=unix
 
 " KEY BINDS ----------------
+
+" Change copy to clipboard
+noremap <leader>y "*y
 
 " split navigations
 nnoremap <C-J> <C-W><C-J>
@@ -44,8 +58,22 @@ imap jk <Esc>
 imap kj <Esc>
 
 " Enable folding with the spacebar
- nnoremap <space> za
+nnoremap <space> za
 
+" Buffer stuff
+nnoremap <leader>l :ls<CR>
+nnoremap <leader>b :bp<CR>
+nnoremap <leader>f :bn<CR>
+nnoremap <leader><BS> :e#<CR>
+nnoremap <leader>1 :1b<CR>
+nnoremap <leader>2 :2b<CR>
+nnoremap <leader>3 :3b<CR>
+nnoremap <leader>4 :4b<CR>
+nnoremap <leader>5 :5b<CR>
+nnoremap <leader>6 :6b<CR>
+nnoremap <leader>7 :7b<CR>
+nnoremap <leader>8 :8b<CR>
+nnoremap <leader>9 :9b<CR>
 
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
@@ -63,6 +91,7 @@ Plugin 'yggdroot/indentline' " Show indent lines (useful for loops)
 Plugin 'davidhalter/jedi-vim' " python autocompletion
 Plugin 'ervandew/supertab' " <Tab> for code completion
 Plugin 'scrooloose/nerdTree' " Documents tree
+Plugin 'pearofducks/ansible-vim' " Ansible stuff
 
 " PLUGINS END ----------------
 call vundle#end()            " required
@@ -89,7 +118,7 @@ set statusline+=%*
 
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
-let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_open = 0
 let g:syntastic_check_on_wq = 0
 
 let g:syntastic_python_checkers = ['pylint']
@@ -98,3 +127,6 @@ let g:jedi#force_py_version = 3
 au FileType python let b:delimitMate_nesting_quotes = ['"'] " auto triple quotes
 autocmd FileType python setlocal completeopt-=preview " no window on autocomplete
 let g:jedi#show_call_signatures = "0"
+
+" My commands
+command -nargs=1 Pygrep vimgrep /<args>/gj ./*/*.py
