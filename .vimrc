@@ -21,11 +21,22 @@ highlight ColorColumn ctermbg=8
 set foldmethod=indent
 set foldlevel=99
 
+" Relative number stuff
+set number relativenumber
+
+augroup numbertoggle
+  autocmd!
+  autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
+  autocmd BufLeave,FocusLost,InsertEnter * set norelativenumber
+augroup END
+
 " Save all .swp files in ~/.vim/tmp/
 set directory^=$HOME/.vim/tmp//
 
 " Set leader key
 let mapleader = ","
+
+au BufNewFile,BufRead *.zsh-theme set syntax=sh
 
 " PYTHON STUFF -------------
 au BufNewFile,BufRead *.py
@@ -40,6 +51,7 @@ au BufNewFile,BufRead *.py
 
 " Change copy to clipboard
 noremap <leader>y "*y
+noremap <leader>A ggVG"*y  " Copy entire file into clipboard
 
 " split navigations
 nnoremap <C-J> <C-W><C-J>
@@ -84,7 +96,6 @@ call vundle#begin()
 Plugin 'gmarik/Vundle.vim' " Package manager
 Plugin 'tmhedberg/SimpylFold' " Better folds for python
 Plugin 'vim-scripts/indentpython.vim' " Python indenting
-Plugin 'vim-syntastic/syntastic' " syntax
 Plugin 'tpope/vim-fugitive' " git
 Plugin 'Raimondi/delimitMate' " automatic closing of quotes, parenthesis
 Plugin 'yggdroot/indentline' " Show indent lines (useful for loops)
@@ -92,6 +103,7 @@ Plugin 'davidhalter/jedi-vim' " python autocompletion
 Plugin 'ervandew/supertab' " <Tab> for code completion
 Plugin 'scrooloose/nerdTree' " Documents tree
 Plugin 'pearofducks/ansible-vim' " Ansible stuff
+Plugin 'w0rp/ale' " Linting
 
 " PLUGINS END ----------------
 call vundle#end()            " required
@@ -112,16 +124,9 @@ let g:jedi#documentation_command = "<leader>h"
 let g:jedi#usages_command = "<leader>u"
 let g:jedi#rename_command = "<leader>r"
 
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
-
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_check_on_open = 0
-let g:syntastic_check_on_wq = 0
-
-let g:syntastic_python_checkers = ['pylint']
+let g:ale_lint_on_enter = 0
+let g:ale_echo_msg_format = '[%linter%] %s'
+let g:ale_linters = {'python': ['flake8', 'pylint']}
 
 let g:jedi#force_py_version = 3
 au FileType python let b:delimitMate_nesting_quotes = ['"'] " auto triple quotes
