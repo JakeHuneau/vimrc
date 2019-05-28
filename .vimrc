@@ -105,6 +105,7 @@ Plugin 'scrooloose/nerdTree' " Documents tree
 Plugin 'pearofducks/ansible-vim' " Ansible stuff
 Plugin 'w0rp/ale' " Linting
 Plugin 'vim-python/python-syntax' " Python Syntax better
+Plugin 'rust-lang/rust.vim' " Rust
 
 " PLUGINS END ----------------
 call vundle#end()            " required
@@ -127,9 +128,11 @@ let g:jedi#rename_command = "<leader>r"
 
 let g:ale_lint_on_enter = 0
 let g:ale_echo_msg_format = '[%linter%] %s'
-let g:ale_linters = {'python': ['flake8', 'pylint']}
+let g:ale_linters = {'python': ['flake8', 'pylint'], 'rust': ['cargo', 'rls']}
 let g:ale_python_flake8_options = '--ignore E501'
 let g:ale_python_pylint_options = '--disable C0301'
+let b:ale_fixers = {'rust': ['rustfmt']}
+let g:ale_fix_on_save = 1
 
 let g:jedi#force_py_version = 3
 au FileType python let b:delimitMate_nesting_quotes = ['"'] " auto triple quotes
