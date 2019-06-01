@@ -1,4 +1,3 @@
-
 " Leader key
 	let mapleader = ","
 
