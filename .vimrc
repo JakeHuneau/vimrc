@@ -21,6 +21,11 @@
 	Plugin 'w0rp/ale' " Linting
 	Plugin 'vim-python/python-syntax' " Python Syntax better
 	Plugin 'rust-lang/rust.vim' " Rust
+	Plugin 'OmniSharp/omnisharp-vim' " C#
+	Plugin 'SirVer/ultisnips'  " Snippets
+	Plugin 'ctrlp.vim'  " fuzzy file search
+	Plugin 'prabirshrestha/asyncomplete.vim'
+	Plugin 'prabirshrestha/async.vim'
 
 	call vundle#end()
 	filetype plugin indent on
@@ -33,6 +38,12 @@
 	set splitbelow splitright " Always split under and to the right
 
 	syntax on
+
+	inoremap <expr> <Tab> pumvisible() ? '<C-n>' : \ getline('.')[col('.')-2] =~# '[[:alnum:].-_#$]' ? '<C-x><C-o>' : '<Tab>'
+
+" New line without going into insert mode
+	nnoremap <leader>o o<Esc>
+	nnoremap <leader>O O<Esc>
 
 " Disable automatic commenting on new line
 	autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
@@ -53,10 +64,6 @@
 	set statusline=%02n:%f\ Line\ %l\ Column\ %c\ %m
 	set laststatus=2
 
-" Grey guide line at 120
-	set colorcolumn=120
-	highlight ColorColumn ctermbg=8
-
 " Enable folding and with space
 	set foldmethod=indent
 	set foldlevel=99
@@ -66,12 +73,25 @@
 	autocmd BufNewFile,BufRead *.zsh-theme set syntax=sh
 	autocmd BufNewFile,BufRead *.json set filetype=javascript
 	autocmd BufNewFile,BufRead *.py
-		    \ set tabstop=4 |
-		    \ set softtabstop=4 |
-		    \ set shiftwidth=4 |
-		    \ set expandtab |
-		    \ set autoindent |
-		    \ set fileformat=unix
+		\ set tabstop=4 |
+		\ set softtabstop=4 |
+		\ set shiftwidth=4 |
+		\ set expandtab |
+		\ set autoindent |
+		\ set fileformat=unix |
+		\ set colorcolumn=120 |
+		\ highlight ColorColumn ctermbg=8
+	" Run the current python file and show result in terminal
+	autocmd BufNewFile,BufRead *.py nnoremap <leader>c :w<CR>:exec '!python3' shellescape(@%, 1)<CR>
+
+	autocmd BufNewFile,BufRead *.cs
+		\ set tabstop=4 |
+		\ set softtabstop=4 |
+		\ set shiftwidth=4 |
+		\ set expandtab |
+		\ set autoindent |
+	" Call 'dotnet run' and show result on terminal
+	autocmd BufNewFile,BufRead *.cs nnoremap <leader>c :w<CR>:exec '!dotnet run' shellescape(@%, 1)<CR>
 
 " Change copy to clipboard
 	noremap <leader>y "*y
@@ -82,6 +102,12 @@
 	nnoremap <C-K> <C-W><C-K>
 	nnoremap <C-L> <C-W><C-L>
 	nnoremap <C-H> <C-W><C-H>
+
+" Resize splits with arrow keys
+	nnoremap <Left> <C-W><
+	nnoremap <Right> <C-W>>
+	nnoremap <Up>  <C-W>+
+	nnoremap <Down> <C-W>-
 
 " Naviate between paragraphs and to start/end of line with shift+direction
 	noremap K {
@@ -107,6 +133,7 @@
 	nnoremap <leader>7 :7b<CR>
 	nnoremap <leader>8 :8b<CR>
 	nnoremap <leader>9 :9b<CR>
+	nnoremap <leader>pb :edit ~/Documents/temp/scrap.py<CR>
 
 " ---PLUGINS---
 
@@ -129,9 +156,9 @@
 	autocmd FileType python setlocal completeopt-=preview " no window on autocomplete
 
 " Ale
-	let g:ale_lint_on_enter = 0
+	let g:ale_lint_on_enter = 1
 	let g:ale_echo_msg_format = '[%linter%] %s'
-	let g:ale_linters = {'python': ['flake8', 'pylint'], 'rust': ['cargo', 'rls']}
+	let g:ale_linters = {'python': ['flake8', 'pylint'], 'rust': ['cargo', 'rls'], 'cs': ['OmniSharp']}
 	let g:ale_python_flake8_options = '--ignore E501'
 	let g:ale_python_pylint_options = '--disable C0301,R0913,W1203,R0914,C0103'
 	let b:ale_fixers = {'rust': ['rustfmt']}
@@ -139,7 +166,57 @@
 
 " DelitMate
 	au FileType python let b:delimitMate_nesting_quotes = ['"'] " auto triple quotes
+	au FileType cs let b:delimitMate_expand_cr = 1
 
+" OmniSharp
+	let g:OmniSharp_server_stdio = 1 " Use server
+	let g:OmniSharp_highlight_types = 2 " Better highlighting
+	augroup omnisharp_commands
+	    autocmd!
+
+	    " The following commands are contextual, based on the cursor position.
+	    autocmd FileType cs nnoremap <buffer> <Leader>g :OmniSharpGotoDefinition<CR>
+	    autocmd FileType cs nnoremap <buffer> <Leader>fi :OmniSharpFindImplementations<CR>
+	    autocmd FileType cs nnoremap <buffer> <Leader>fs :OmniSharpFindSymbol<CR>
+	    autocmd FileType cs nnoremap <buffer> <Leader>fu :OmniSharpFindUsages<CR>
+
+	    " Finds members in the current buffer
+	    autocmd FileType cs nnoremap <buffer> <Leader>fm :OmniSharpFindMembers<CR>
+
+	    autocmd FileType cs nnoremap <buffer> <Leader>fx :OmniSharpFixUsings<CR>
+	    autocmd FileType cs nnoremap <buffer> <Leader>tt :OmniSharpTypeLookup<CR>
+	    autocmd FileType cs nnoremap <buffer> <Leader>h :OmniSharpDocumentation<CR>
+	    autocmd FileType cs nnoremap <buffer> <C-\> :OmniSharpSignatureHelp<CR>
+	    autocmd FileType cs inoremap <buffer> <C-\> <C-o>:OmniSharpSignatureHelp<CR>
+
+	    " Find all code errors/warnings for the current solution and populate the quickfix window
+	    autocmd FileType cs nnoremap <buffer> <Leader>cc :OmniSharpGlobalCodeCheck<CR>
+	augroup END
+
+	nnoremap <Leader>f :OmniSharpCodeFormat<CR>
+
+" asyncomplete
+	set completeopt=menuone,noinsert,noselect,preview
+	let g:asyncomplete_auto_popup = 1
+	let g:asyncomplete_auto_completeopt = 0
+	let g:asyncomplete_force_refresh_on_context_changed = 1
+
+	let g:OmniSharp_server_stdio = 1
+	let g:OmniSharp_highlight_types = 2
+
+	" if using ultisnips, set g:OmniSharp_want_snippet to 1
+	let g:OmniSharp_want_snippet = 1
+	let g:omnicomplete_fetch_full_documentation = 1
+
+	" Close preview window after selecting
+	autocmd CompleteDone * pclose
+
+" Ultisnips
+	" Avoid mapping conflicts
+	let g:UltiSnipsRemoveSelectModeMappings = 0
+	let g:UltiSnipsExpandTrigger = '<C-l>'
+	let g:UltiSnipsJumpForwardTrigger = '<C-g>'
+	let g:UltiSnipsJumpBackwardTrigger = '<C-t>'
 
 " ---My Stuff---
 
